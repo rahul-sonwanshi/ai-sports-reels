@@ -1,15 +1,18 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+// No need to import styles from Home.module.css for this specific fix.
+// The `hide-scrollbar` class is a global class from `globals.css`.
 
-// Define the Reel type, including a new optional property for lastPlaybackTime
+// Make sure your Reel type is defined as before
 type Reel = {
   id: string;
   title: string;
   videoUrl: string;
   tags: string[];
-  lastPlaybackTime?: number; // Added to store the last played position
+  lastPlaybackTime?: number;
 };
 
-// Component for a single video reel with play/pause and mute/unmute functionality
+// --- Your VideoReel component code should be placed here (unchanged from last time) ---
+// If you copy-pasted the whole file from the previous response, it's already here.
 function VideoReel({
   reel,
   isActive,
@@ -21,19 +24,14 @@ function VideoReel({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true); // Start muted for reliable autoplay
+  const [isMuted, setIsMuted] = useState(true);
 
-  // Effect to manage play/pause, volume, and save/restore playback time
   useEffect(() => {
     if (videoRef.current) {
-      // Control volume directly based on isMuted state
-      videoRef.current.volume = isMuted ? 0 : 1; // 0 for muted, 1 for full volume
+      videoRef.current.volume = isMuted ? 0 : 1;
 
       if (isActive) {
-        // Restore playback time when the video becomes active
-        videoRef.current.currentTime = reel.lastPlaybackTime || 0; // Play from stored time or beginning
-
-        // Attempt to play the video. Browsers generally allow autoplay if muted.
+        videoRef.current.currentTime = reel.lastPlaybackTime || 0;
         videoRef.current
           .play()
           .then(() => {
@@ -41,21 +39,18 @@ function VideoReel({
           })
           .catch((error) => {
             console.error("Video play failed:", error);
-            setIsPlaying(false); // Set to paused if autoplay couldn't start
+            setIsPlaying(false);
           });
       } else {
-        // Pause and save current playback time when the video becomes inactive
         videoRef.current.pause();
         setIsPlaying(false);
         if (videoRef.current.currentTime > 0) {
-          // Only save if the video actually started playing
           onTimeUpdate(reel.id, videoRef.current.currentTime);
         }
       }
     }
-  }, [isActive, isMuted, reel.id, reel.lastPlaybackTime, onTimeUpdate]); // Add new dependencies
+  }, [isActive, isMuted, reel.id, reel.lastPlaybackTime, onTimeUpdate]);
 
-  // Handler for tapping the video to toggle play/pause
   const togglePlayPause = useCallback(() => {
     if (videoRef.current) {
       if (isPlaying) {
@@ -69,7 +64,6 @@ function VideoReel({
     }
   }, [isPlaying]);
 
-  // Handler for the mute/unmute button
   const toggleMute = useCallback(() => {
     setIsMuted((prev) => !prev);
   }, []);
@@ -93,7 +87,6 @@ function VideoReel({
         onClick={togglePlayPause}
         loop
         playsInline
-        // 'muted' attribute is removed, volume is controlled by JS
         style={{
           width: "100%",
           height: "100%",
@@ -103,7 +96,6 @@ function VideoReel({
         }}
       />
 
-      {/* Optional: Play/Pause Overlay Icon */}
       {!isPlaying && isActive && (
         <div
           style={{
@@ -123,8 +115,7 @@ function VideoReel({
         </div>
       )}
 
-      {/* Mute/Unmute Button/Icon Overlay */}
-      {isActive && ( // Only show the mute button for the active video
+      {isActive && (
         <button
           onClick={toggleMute}
           style={{
@@ -149,7 +140,6 @@ function VideoReel({
         </button>
       )}
 
-      {/* Title and Tags Overlay */}
       <div
         style={{
           position: "absolute",
@@ -169,14 +159,13 @@ function VideoReel({
     </div>
   );
 }
+// --- End of VideoReel component ---
 
-// Main Home component for the reels feed
 export default function Home() {
   const [reels, setReels] = useState<Reel[]>([]);
-  const [currentReelIndex, setCurrentReelIndex] = useState(0); // Tracks the index of the currently active reel
-  const containerRef = useRef<HTMLDivElement>(null); // Ref for the main scrollable container
+  const [currentReelIndex, setCurrentReelIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch reels data from your API
   useEffect(() => {
     fetch("/api/reels")
       .then((res) => {
@@ -186,7 +175,6 @@ export default function Home() {
         return res.json();
       })
       .then((fetchedReels) => {
-        // Initialize lastPlaybackTime for fetched reels
         setReels(
           fetchedReels.map((reel: Reel) => ({ ...reel, lastPlaybackTime: 0 }))
         );
@@ -194,14 +182,12 @@ export default function Home() {
       .catch((error) => console.error("Failed to fetch reels:", error));
   }, []);
 
-  // Callback to update a reel's lastPlaybackTime in the parent's state
   const updateReelPlaybackTime = useCallback((id: string, time: number) => {
     setReels((prevReels) =>
       prevReels.map((r) => (r.id === id ? { ...r, lastPlaybackTime: time } : r))
     );
-  }, []); // No dependencies needed for useCallback as setReels is stable
+  }, []);
 
-  // Intersection Observer to detect which reel is mostly in view
   useEffect(() => {
     if (!containerRef.current || reels.length === 0) {
       return;
@@ -228,7 +214,6 @@ export default function Home() {
 
     const elementsToObserve =
       containerRef.current.querySelectorAll("[data-reel-item]");
-    // Use a timeout to ensure elements are rendered before observing, especially on initial load
     const timeoutId = setTimeout(() => {
       elementsToObserve.forEach((el) => {
         observer.observe(el);
@@ -247,8 +232,9 @@ export default function Home() {
   return (
     <main
       ref={containerRef}
+      className="hide-scrollbar" // <-- APPLY THIS CLASS HERE
       style={{
-        overflowY: "scroll",
+        overflowY: "scroll", // KEEP THIS: It enables the scrolling behavior
         height: "100vh",
         scrollSnapType: "y mandatory",
         scrollBehavior: "smooth",
@@ -272,7 +258,6 @@ export default function Home() {
             background: "black",
           }}
         >
-          {/* Pass the update callback to VideoReel */}
           <VideoReel
             reel={reel}
             isActive={index === currentReelIndex}
