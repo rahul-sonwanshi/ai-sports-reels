@@ -1,20 +1,18 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
+import { listReels } from "../../lib/s3";
 
-const fakeReels = [
-  {
-    id: "messi_2022",
-    title: "Messi World Cup Glory",
-    videoUrl: "https://your-s3-bucket.s3.amazonaws.com/messi_2022.mp4",
-    tags: ["messi", "football"],
-  },
-  {
-    id: "serena_grand_slams",
-    title: "Serena’s Slam Era",
-    videoUrl: "https://your-s3-bucket.s3.amazonaws.com/serena_slam.mp4",
-    tags: ["tennis", "serena"],
-  },
-];
+export default async function handler(
+  _req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const items = await listReels();
+  console.log(items);
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  res.status(200).json(fakeReels);
+  const reels = items.map(({ name, publicUrl }) => ({
+    id: name.replace(/^reels\//, "").replace(/\.mp4$/, ""),
+    title: name.replace(/^reels\//, "").replace(/_/g, " "),
+    videoUrl: publicUrl,
+  }));
+
+  res.status(200).json(reels);
 }

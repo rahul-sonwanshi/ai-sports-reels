@@ -29,6 +29,17 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+##Usage for generating new reel
+Replace the placeholder with celeb image at public/placeholder.jpg
+C:\Users\rahul>curl -X POST http://localhost:3000/api/generate -H "Content-Type: application/json" -d "{\"celebName\":\"Novak Djokovic\"}"
+{"id":"Novak Djokovic","videoUrl":"https://ysjlgrghqjzqofinyplk.supabase.co/storage/v1/object/public/ai-sports-reels/reels/Novak_Djokovic.mp4"}
+C:\Users\rahul>curl -X POST http://localhost:3000/api/generate -H "Content-Type: application/json" -d "{\"celebName\":\"Virat Kholi\"}"
+{"id":"Virat Kholi","videoUrl":"https://ysjlgrghqjzqofinyplk.supabase.co/storage/v1/object/public/ai-sports-reels/reels/Virat_Kholi.mp4"}
+C:\Users\rahul>curl -X POST http://localhost:3000/api/generate -H "Content-Type: application/json" -d "{\"celebName\":\"Lionel Messi\"}"
+{"id":"Lionel Messi","videoUrl":"https://ysjlgrghqjzqofinyplk.supabase.co/storage/v1/object/public/ai-sports-reels/reels/Lionel_Messi.mp4"}
+C:\Users\rahul>curl -X POST http://localhost:3000/api/generate -H "Content-Type: application/json" -d "{\"celebName\":\"Sachin Tendulkar\"}"
+{"id":"Sachin Tendulkar","videoUrl":"https://ysjlgrghqjzqofinyplk.supabase.co/storage/v1/object/public/ai-sports-reels/reels/Sachin_Tendulkar.mp4"}
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
